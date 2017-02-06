@@ -46,6 +46,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetExtractorDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
+import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlRelDbDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.JobRequest;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.ValidationRequest;
@@ -76,6 +77,8 @@ public interface EtlClient {
 	List<EtlPatientSetSenderDestination> getPatientSetSenderDestinations() throws ClientException;
 	
 	List<EtlTabularFileDestination> getTabularFileDestinations() throws ClientException;
+	
+	List<EtlRelDbDestination> getRelDbDestinations() throws ClientException;
 
 	List<EtlDestination> getDestinations() throws ClientException;
 	

@@ -931,4 +931,40 @@
 		<createSequence sequenceName="TF_DEST_TC_SEQ"/>
 		<addForeignKeyConstraint baseColumnNames="TABULARFILEDESTINATIONS_ID" baseTableName="TF_DEST_TABLECOLUMNS" constraintName="FK_TF_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="TABULAR_FILE_DESTINATIONS" referencesUniqueColumn="false"/>
 	</changeSet>
+	<changeSet author="arpost" id="1361552652236-44">
+		<createTable tableName="REL_DB_DESTINATIONS">
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="RDB_DEST_PK"/>
+			</column>
+			<column name="CONNECT" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="USER" type="VARCHAR(255)"/>
+			<column name="PASSWORD" type="VARCHAR(255)"/>
+		</createTable>
+		<addForeignKeyConstraint baseColumnNames="ID" baseTableName="REL_DB_DESTINATIONS" constraintName="FK_RELDB_DEST" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="DESTINATIONS" referencesUniqueColumn="false"/>
+		<createTable tableName="RELDB_DEST_TABLECOLUMNS">
+			<column name="ID" type="BIGINT">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="TF_DEST_TC_PK"/>
+			</column>
+			<column name="RELDBDESTINATIONS_ID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="TABLENAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="COLUMNNAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="RANK" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="PATH" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="FORMAT" type="VARCHAR(255)"/>
+		</createTable>
+		<createSequence sequenceName="RELDB_DEST_TC_SEQ"/>
+		<addForeignKeyConstraint baseColumnNames="RELDBDESTINATIONS_ID" baseTableName="RELDB_DEST_TABLECOLUMNS" constraintName="FK_RELDB_DEST_TC" deferrable="false" initiallyDeferred="false" onDelete="RESTRICT" referencedColumnNames="ID" referencedTableName="REL_DB_DESTINATIONS" referencesUniqueColumn="false"/>
+	</changeSet>
 </databaseChangeLog>

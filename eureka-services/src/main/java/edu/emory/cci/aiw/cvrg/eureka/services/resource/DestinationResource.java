@@ -153,6 +153,8 @@ public class DestinationResource {
 					case TABULAR_FILE:
 						destinations = this.etlClient.getTabularFileDestinations();
 						break;
+					case RELDB:
+						destinations = this.etlClient.getRelDbDestinations();
 					default:
 						throw new AssertionError("Unexpected type " + type);
 				}

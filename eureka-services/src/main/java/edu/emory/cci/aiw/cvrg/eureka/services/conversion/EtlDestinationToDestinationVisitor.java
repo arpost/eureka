@@ -50,6 +50,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlNeo4jDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetExtractorDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
+import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlRelDbDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTableColumn;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import org.eurekaclinical.eureka.client.comm.I2B2Destination;
@@ -162,6 +163,23 @@ public class EtlDestinationToDestinationVisitor extends AbstractEtlDestinationVi
 	@Override
 	public void visit(EtlTabularFileDestination etlTabularFileDestination) {
 		TabularFileDestination tabularFileDest = new TabularFileDestination();
+		visitCommon(etlTabularFileDestination, tabularFileDest);
+		List<TableColumn> tableColumns = new ArrayList<>();
+		for (EtlTableColumn etlTableColumn : etlTabularFileDestination.getTableColumns()) {
+			TableColumn tableColumn = new TableColumn();
+			tableColumn.setTableName(etlTableColumn.getTableName());
+			tableColumn.setColumnName(etlTableColumn.getColumnName());
+			tableColumn.setPath(etlTableColumn.getPath());
+			tableColumn.setFormat(etlTableColumn.getFormat());
+			tableColumns.add(tableColumn);
+		}
+		tabularFileDest.setTableColumns(tableColumns);
+		this.destination = tabularFileDest;
+	}
+	
+	@Override
+	public void visit(EtlRelDbDestination etlTabularFileDestination) {
+		RelDbDestination tabularFileDest = new RelDbDestination();
 		visitCommon(etlTabularFileDestination, tabularFileDest);
 		List<TableColumn> tableColumns = new ArrayList<>();
 		for (EtlTableColumn etlTableColumn : etlTabularFileDestination.getTableColumns()) {

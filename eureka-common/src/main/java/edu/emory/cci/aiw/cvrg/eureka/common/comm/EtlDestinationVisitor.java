@@ -56,4 +56,6 @@ public interface EtlDestinationVisitor {
 	void visit(EtlPatientSetSenderDestination etlPatientSetSenderDestination);
 	
 	void visit(EtlTabularFileDestination etlTabularFileDestination);
+	
+	void visit(EtlRelDbDestination etlRelDbDestination);
 }

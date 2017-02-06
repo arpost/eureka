@@ -47,6 +47,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.entity.DestinationEntity_;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.common.entity.RelDbDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.TabularFileDestinationEntity;
 import java.util.Date;
 import java.util.List;
@@ -94,85 +95,49 @@ public class JpaDestinationDao extends GenericDao<DestinationEntity, Long> imple
 
 	@Override
 	public List<DestinationEntity> getAll() {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<DestinationEntity> criteriaQuery = builder.createQuery(DestinationEntity.class);
-		Root<DestinationEntity> root = criteriaQuery.from(DestinationEntity.class);
-		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
-		criteriaQuery.where(builder.or(
-				builder.isNull(root.get(DestinationEntity_.expiredAt)),
-				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<DestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return allDestinations(DestinationEntity.class);
 	}
 
 	@Override
 	public List<CohortDestinationEntity> getAllCohortDestinations() {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<CohortDestinationEntity> criteriaQuery = builder.createQuery(CohortDestinationEntity.class);
-		Root<CohortDestinationEntity> root = criteriaQuery.from(CohortDestinationEntity.class);
-		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
-		criteriaQuery.where(builder.or(
-				builder.isNull(root.get(DestinationEntity_.expiredAt)),
-				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<CohortDestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return allDestinations(CohortDestinationEntity.class);
 	}
 
 	@Override
 	public List<I2B2DestinationEntity> getAllI2B2Destinations() {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<I2B2DestinationEntity> criteriaQuery = builder.createQuery(I2B2DestinationEntity.class);
-		Root<I2B2DestinationEntity> root = criteriaQuery.from(I2B2DestinationEntity.class);
-		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
-		criteriaQuery.where(builder.or(
-				builder.isNull(root.get(DestinationEntity_.expiredAt)),
-				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<I2B2DestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return allDestinations(I2B2DestinationEntity.class);
 	}
 
 	@Override
 	public List<PatientSetExtractorDestinationEntity> getAllPatientSetExtractorDestinations() {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<PatientSetExtractorDestinationEntity> criteriaQuery = builder.createQuery(PatientSetExtractorDestinationEntity.class);
-		Root<PatientSetExtractorDestinationEntity> root = criteriaQuery.from(PatientSetExtractorDestinationEntity.class);
-		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
-		criteriaQuery.where(builder.or(
-				builder.isNull(root.get(DestinationEntity_.expiredAt)),
-				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<PatientSetExtractorDestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return allDestinations(PatientSetExtractorDestinationEntity.class);
 	}
 	
 	@Override
 	public List<PatientSetSenderDestinationEntity> getAllPatientSetSenderDestinations() {
-		EntityManager entityManager = getEntityManager();
-		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<PatientSetSenderDestinationEntity> criteriaQuery = builder.createQuery(PatientSetSenderDestinationEntity.class);
-		Root<PatientSetSenderDestinationEntity> root = criteriaQuery.from(PatientSetSenderDestinationEntity.class);
-		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
-		criteriaQuery.where(builder.or(
-				builder.isNull(root.get(DestinationEntity_.expiredAt)),
-				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<PatientSetSenderDestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
-		return typedQuery.getResultList();
+		return allDestinations(PatientSetSenderDestinationEntity.class);
 	}
 	
 	@Override
 	public List<TabularFileDestinationEntity> getAllTabularFileDestinations() {
+		return allDestinations(TabularFileDestinationEntity.class);
+	}
+	
+	@Override
+	public List<RelDbDestinationEntity> getAllRelDbDestinations() {
+		return allDestinations(RelDbDestinationEntity.class);
+	}
+	
+	private <E extends DestinationEntity> List<E> allDestinations(Class<E> entityCls) {
 		EntityManager entityManager = getEntityManager();
 		CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-		CriteriaQuery<TabularFileDestinationEntity> criteriaQuery = builder.createQuery(TabularFileDestinationEntity.class);
-		Root<TabularFileDestinationEntity> root = criteriaQuery.from(TabularFileDestinationEntity.class);
+		CriteriaQuery<E> criteriaQuery = builder.createQuery(entityCls);
+		Root<E> root = criteriaQuery.from(entityCls);
 		Path<Date> expiredAt = root.get(DestinationEntity_.expiredAt);
 		criteriaQuery.where(builder.or(
 				builder.isNull(root.get(DestinationEntity_.expiredAt)),
 				builder.greaterThanOrEqualTo(expiredAt, new Date())));
-		TypedQuery<TabularFileDestinationEntity> typedQuery = entityManager.createQuery(criteriaQuery);
+		TypedQuery<E> typedQuery = entityManager.createQuery(criteriaQuery);
 		return typedQuery.getResultList();
 	}
 

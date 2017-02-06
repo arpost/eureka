@@ -48,6 +48,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.entity.I2B2DestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.Neo4jDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetExtractorDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetSenderDestinationEntity;
+import edu.emory.cci.aiw.cvrg.eureka.common.entity.RelDbDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
@@ -63,6 +64,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	private final PatientSetExtractorDestinationsDTOExtractor patientSetExtractorExtractor;
 	private final PatientSetSenderDestinationsDTOExtractor patientSetSenderExtractor;
 	private final TabularFileDestinationsDTOExtractor tabularFileExtractor;
+	private final RelDbDestinationsDTOExtractor relDbExtractor;
 	private EtlDestination destDTO;
 
 	public DestinationDTOExtractorVisitor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
@@ -72,6 +74,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.patientSetExtractorExtractor = new PatientSetExtractorDestinationsDTOExtractor(user, inGroupDao);
 		this.patientSetSenderExtractor = new PatientSetSenderDestinationsDTOExtractor(user, inGroupDao);
 		this.tabularFileExtractor = new TabularFileDestinationsDTOExtractor(user, inGroupDao);
+		this.relDbExtractor = new RelDbDestinationsDTOExtractor(user, inGroupDao);
 	}
 	
 	@Override
@@ -102,6 +105,11 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	@Override
 	public void visit(TabularFileDestinationEntity tabularFileDestination) {
 		this.destDTO = this.tabularFileExtractor.extractDTO(tabularFileDestination);
+	}
+	
+	@Override
+	public void visit(RelDbDestinationEntity relDbDestinationEntity) {
+		this.destDTO = this.relDbExtractor.extractDTO(relDbDestinationEntity);
 	}
 	
 	public EtlDestination getEtlDestination() {
