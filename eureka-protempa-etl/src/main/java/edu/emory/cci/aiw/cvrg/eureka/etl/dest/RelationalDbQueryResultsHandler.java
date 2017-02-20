@@ -41,14 +41,12 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  */
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.RelDbDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.RelDbDestinationTableColumnEntity;
-import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import edu.emory.cci.aiw.i2b2etl.dest.config.DatabaseSpec;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,7 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.arp.javautil.string.StringUtil;
+import org.arp.javautil.sql.ConnectionSpec;
+import org.neo4j.helpers.ArrayUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
@@ -67,7 +66,9 @@ import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
+import org.protempa.dest.table.RelDbTabularWriter;
 import org.protempa.dest.table.TableColumnSpec;
+import org.protempa.dest.table.TabularWriterException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
@@ -82,25 +83,20 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RelationalDbQueryResultsHandler.class);
 
-	private final String queryId;
-	private final String username;
 	private final RelDbDestinationEntity config;
-	private Map<String, BufferedWriter> writers;
+	private Map<String, RelDbTabularWriter> writers;
 	private Map<String, List<TableColumnSpec>> tableColumnSpecs;
 	private final Map<String, Set<String>> rowPropositionIdMap;
-	private final EtlProperties etlProperties;
-	private KnowledgeSource knowledgeSource;
+	private final KnowledgeSource knowledgeSource;
 	private KnowledgeSourceCache ksCache;
-	private Map<String, String> replace;
+	private final RelDbDestinationEntity relDbDestinationEntity;
 
-	RelationalDbQueryResultsHandler(Query query, RelDbDestinationEntity inRelDbDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
+	RelationalDbQueryResultsHandler(Query query, RelDbDestinationEntity inRelDbDestinationEntity, KnowledgeSource inKnowledgeSource) {
 		assert inRelDbDestinationEntity != null : "inRelDbDestinationEntity cannot be null";
-		this.etlProperties = inEtlProperties;
-		this.queryId = query.getName();
-		this.username = query.getUsername();
 		this.config = inRelDbDestinationEntity;
 		this.knowledgeSource = inKnowledgeSource;
 		this.rowPropositionIdMap = new HashMap<>();
+		this.relDbDestinationEntity = inRelDbDestinationEntity;
 	}
 
 	@Override
@@ -110,19 +106,23 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 	@Override
 	public void start(Collection<PropositionDefinition> cache) throws QueryResultsHandlerProcessingException {
 		try {
-			File outputFileDirectory = this.etlProperties.outputFileDirectory(this.config.getName());
 			List<String> tableNames = this.config.getTableColumns()
 					.stream()
 					.map(RelDbDestinationTableColumnEntity::getTableName)
 					.distinct()
 					.collect(Collectors.toCollection(ArrayList::new));
 			this.writers = new HashMap<>();
+			DatabaseSpecFactory databaseSpecFactory = new DatabaseSpecFactory();
+			DatabaseSpec dbSpec = databaseSpecFactory.getInstance(this.relDbDestinationEntity.getConnect(), this.relDbDestinationEntity.getUser(), this.relDbDestinationEntity.getPassword());
+			ConnectionSpec connectionSpec = dbSpec.toConnectionSpec();
 			for (int i = 0, n = tableNames.size(); i < n; i++) {
 				String tableName = tableNames.get(i);
-				File file = new File(outputFileDirectory, tableName);
-				this.writers.put(tableName, new BufferedWriter(new FileWriter(file)));
+				String[] questionMarkArr = new String[this.relDbDestinationEntity.getTableColumns().size()];
+				Arrays.fill(questionMarkArr, "?");
+				String q = "INSERT INTO " + tableName + " VALUES (" + ArrayUtil.join(questionMarkArr, ",") + ")";
+				this.writers.put(tableName, new RelDbTabularWriter(connectionSpec, q));
 			}
-		} catch (IOException ex) {
+		} catch (SQLException ex) {
 			throw new QueryResultsHandlerProcessingException(ex);
 		}
 
@@ -169,11 +169,13 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 					columnNames.add(colName);
 				}
 			}
-			BufferedWriter writer = this.writers.get(me.getKey());
+			RelDbTabularWriter writer = this.writers.get(me.getKey());
 			try {
-				StringUtil.escapeAndWriteDelimitedColumns(columnNames, this.delimiter, writer);
-				writer.newLine();
-			} catch (IOException ex) {
+				for (String columnName : columnNames) {
+					writer.writeString(columnName);
+				}
+				writer.newRow();
+			} catch (TabularWriterException ex) {
 				throw new QueryResultsHandlerProcessingException(ex);
 			}
 		}
@@ -184,8 +186,6 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 			throw new QueryResultsHandlerProcessingException(ex);
 		}
 
-		this.replace = new HashMap<>();
-		this.replace.put(null, "NULL");
 	}
 
 	@Override
@@ -198,7 +198,7 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 			String tableName = me.getKey();
 			List<TableColumnSpec> columnSpecs = me.getValue();
 			int n = columnSpecs.size();
-			BufferedWriter writer = this.writers.get(tableName);
+			RelDbTabularWriter writer = this.writers.get(tableName);
 			Set<String> rowPropIds = this.rowPropositionIdMap.get(tableName);
 			if (rowPropIds != null) {
 				for (Proposition prop : propositions) {
@@ -206,14 +206,10 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 						try {
 							for (int i = 0; i < n; i++) {
 								TableColumnSpec columnSpec = columnSpecs.get(i);
-								columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, this.replace, this.delimiter, writer);
-								if (i < n - 1) {
-									writer.write(this.delimiter);
-								} else {
-									writer.newLine();
-								}
+								columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, writer);
 							}
-						} catch (IOException ex) {
+							writer.newRow();
+						} catch (TabularWriterException ex) {
 							throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
 						}
 					}
@@ -230,10 +226,10 @@ public class RelationalDbQueryResultsHandler extends AbstractQueryResultsHandler
 	public void close() throws QueryResultsHandlerCloseException {
 		QueryResultsHandlerCloseException exception = null;
 		if (this.writers != null) {
-			for (BufferedWriter writer : this.writers.values()) {
+			for (RelDbTabularWriter writer : this.writers.values()) {
 				try {
 					writer.close();
-				} catch (IOException ex) {
+				} catch (TabularWriterException ex) {
 					if (exception != null) {
 						exception.addSuppressed(ex);
 					} else {

@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.arp.javautil.string.StringUtil;
 import org.protempa.KnowledgeSource;
 import org.protempa.KnowledgeSourceCache;
 import org.protempa.KnowledgeSourceCacheFactory;
@@ -67,7 +66,9 @@ import org.protempa.dest.AbstractQueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerCloseException;
 import org.protempa.dest.QueryResultsHandlerProcessingException;
 import org.protempa.dest.QueryResultsHandlerValidationFailedException;
+import org.protempa.dest.table.FileTabularWriter;
 import org.protempa.dest.table.TableColumnSpec;
+import org.protempa.dest.table.TabularWriterException;
 import org.protempa.proposition.Proposition;
 import org.protempa.proposition.UniqueId;
 import org.protempa.query.Query;
@@ -82,23 +83,18 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TabularFileQueryResultsHandler.class);
 
-	private final String queryId;
-	private final String username;
 	private final TabularFileDestinationEntity config;
-	private Map<String, BufferedWriter> writers;
+	private Map<String, FileTabularWriter> writers;
 	private Map<String, List<TableColumnSpec>> tableColumnSpecs;
 	private final Map<String, Set<String>> rowPropositionIdMap;
 	private final EtlProperties etlProperties;
 	private KnowledgeSource knowledgeSource;
 	private KnowledgeSourceCache ksCache;
 	private final char delimiter;
-	private Map<String, String> replace;
 
 	TabularFileQueryResultsHandler(Query query, TabularFileDestinationEntity inTabularFileDestinationEntity, EtlProperties inEtlProperties, KnowledgeSource inKnowledgeSource) {
 		assert inTabularFileDestinationEntity != null : "inTabularFileDestinationEntity cannot be null";
 		this.etlProperties = inEtlProperties;
-		this.queryId = query.getName();
-		this.username = query.getUsername();
 		this.config = inTabularFileDestinationEntity;
 		this.knowledgeSource = inKnowledgeSource;
 		Character delim = inTabularFileDestinationEntity.getDelimiter();
@@ -127,7 +123,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 			for (int i = 0, n = tableNames.size(); i < n; i++) {
 				String tableName = tableNames.get(i);
 				File file = new File(outputFileDirectory, tableName);
-				this.writers.put(tableName, new BufferedWriter(new FileWriter(file)));
+				this.writers.put(tableName, new FileTabularWriter(new BufferedWriter(new FileWriter(file)), this.delimiter));
 			}
 		} catch (IOException ex) {
 			throw new QueryResultsHandlerProcessingException(ex);
@@ -176,11 +172,13 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 					columnNames.add(colName);
 				}
 			}
-			BufferedWriter writer = this.writers.get(me.getKey());
+			FileTabularWriter writer = this.writers.get(me.getKey());
 			try {
-				StringUtil.escapeAndWriteDelimitedColumns(columnNames, this.delimiter, writer);
-				writer.newLine();
-			} catch (IOException ex) {
+				for (String columnName : columnNames) {
+					writer.writeString(columnName);
+				}
+				writer.newRow();
+			} catch (TabularWriterException ex) {
 				throw new QueryResultsHandlerProcessingException(ex);
 			}
 		}
@@ -191,8 +189,6 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 			throw new QueryResultsHandlerProcessingException(ex);
 		}
 
-		this.replace = new HashMap<>();
-		this.replace.put(null, "NULL");
 	}
 
 	@Override
@@ -205,7 +201,7 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 			String tableName = me.getKey();
 			List<TableColumnSpec> columnSpecs = me.getValue();
 			int n = columnSpecs.size();
-			BufferedWriter writer = this.writers.get(tableName);
+			FileTabularWriter writer = this.writers.get(tableName);
 			Set<String> rowPropIds = this.rowPropositionIdMap.get(tableName);
 			if (rowPropIds != null) {
 				for (Proposition prop : propositions) {
@@ -213,14 +209,10 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 						try {
 							for (int i = 0; i < n; i++) {
 								TableColumnSpec columnSpec = columnSpecs.get(i);
-								columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, this.replace, this.delimiter, writer);
-								if (i < n - 1) {
-									writer.write(this.delimiter);
-								} else {
-									writer.newLine();
-								}
+								columnSpec.columnValues(keyId, prop, forwardDerivations, backwardDerivations, references, this.ksCache, writer);
 							}
-						} catch (IOException ex) {
+							writer.newRow();
+						} catch (TabularWriterException ex) {
 							throw new QueryResultsHandlerProcessingException("Could not write row" + ex);
 						}
 					}
@@ -237,10 +229,10 @@ public class TabularFileQueryResultsHandler extends AbstractQueryResultsHandler 
 	public void close() throws QueryResultsHandlerCloseException {
 		QueryResultsHandlerCloseException exception = null;
 		if (this.writers != null) {
-			for (BufferedWriter writer : this.writers.values()) {
+			for (FileTabularWriter writer : this.writers.values()) {
 				try {
 					writer.close();
-				} catch (IOException ex) {
+				} catch (TabularWriterException ex) {
 					if (exception != null) {
 						exception.addSuppressed(ex);
 					} else {

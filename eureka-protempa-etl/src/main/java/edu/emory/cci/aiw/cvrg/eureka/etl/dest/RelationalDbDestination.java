@@ -41,8 +41,10 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.dest;
  */
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.RelDbDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
+import java.util.List;
 import org.protempa.DataSource;
 import org.protempa.KnowledgeSource;
+import org.protempa.ProtempaEventListener;
 import org.protempa.dest.AbstractDestination;
 import org.protempa.dest.QueryResultsHandler;
 import org.protempa.dest.QueryResultsHandlerInitException;
@@ -55,20 +57,18 @@ import org.protempa.query.QueryMode;
  */
 public class RelationalDbDestination extends AbstractDestination {
 	private final RelDbDestinationEntity config;
-	private final EtlProperties etlProperties;
 
 	RelationalDbDestination(EtlProperties inEtlProperties, RelDbDestinationEntity inRelDbDestinationEntity) {
 		assert inRelDbDestinationEntity != null : "inRelDbDestinationEntity cannot be null";
 		this.config = inRelDbDestinationEntity;
-		this.etlProperties = inEtlProperties;
 	}
 
 	@Override
-	public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource) throws QueryResultsHandlerInitException {
+	public QueryResultsHandler getQueryResultsHandler(Query query, DataSource dataSource, KnowledgeSource knowledgeSource, List<? extends ProtempaEventListener> eventListeners) throws QueryResultsHandlerInitException {
 		if (query.getQueryMode() == QueryMode.UPDATE) {
 			throw new QueryResultsHandlerInitException("Update mode not supported");
 		}
-		return new RelationalDbQueryResultsHandler(query, this.config, this.etlProperties, knowledgeSource);
+		return new RelationalDbQueryResultsHandler(query, this.config, knowledgeSource);
 	}
 	
 }

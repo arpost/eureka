@@ -59,6 +59,7 @@ import org.eurekaclinical.eureka.client.comm.PatientSetExtractorDestination;
 import java.util.ArrayList;
 import java.util.List;
 import org.eurekaclinical.eureka.client.comm.PatientSetSenderDestination;
+import org.eurekaclinical.eureka.client.comm.RelDbDestination;
 import org.eurekaclinical.eureka.client.comm.TableColumn;
 import org.eurekaclinical.eureka.client.comm.TabularFileDestination;
 

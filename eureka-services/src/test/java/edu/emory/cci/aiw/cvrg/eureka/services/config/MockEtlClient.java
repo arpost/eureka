@@ -46,6 +46,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetExtractorDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
+import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlRelDbDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.JobRequest;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.ValidationRequest;
@@ -217,6 +218,11 @@ public class MockEtlClient implements EtlClient {
 
 	@Override
 	public List<EtlTabularFileDestination> getTabularFileDestinations() throws ClientException {
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public List<EtlRelDbDestination> getRelDbDestinations() throws ClientException {
 		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 	}
 	
