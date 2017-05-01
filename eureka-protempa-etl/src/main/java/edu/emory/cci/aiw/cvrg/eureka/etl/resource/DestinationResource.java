@@ -43,7 +43,6 @@ import com.google.inject.Inject;
 import com.google.inject.persist.Transactional;
 import edu.emory.cci.aiw.cvrg.eureka.common.authentication.AuthorizedUserSupport;
 import org.eurekaclinical.eureka.client.comm.DestinationType;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.DestinationDao;
@@ -67,6 +66,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import org.eurekaclinical.eureka.client.comm.Destination;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 
 @Transactional
@@ -92,26 +92,26 @@ public class DestinationResource {
 	}
 	
 	@POST
-	public Response create(@Context HttpServletRequest request, EtlDestination etlDestination) {
+	public Response create(@Context HttpServletRequest request, Destination inDestination) {
 		AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
 		Destinations destinations = new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao);
-                Long destId = destinations.create(etlDestination);
+                Long destId = destinations.create(inDestination);
                 return Response.created(URI.create("/" + destId)).build();
 	}
 	
 	@PUT
-	public void update(@Context HttpServletRequest request, EtlDestination etlDestination) {
+	public void update(@Context HttpServletRequest request, Destination inDestination) {
 		AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
-		new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao).update(etlDestination);
+		new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao).update(inDestination);
 	}
 	
 	@GET
 	@Path("/{destId}")
-	public EtlDestination getDestination(
+	public Destination getDestination(
 			@Context HttpServletRequest request,
 			@PathParam("destId") String destId) {
 		AuthorizedUserEntity user = this.authenticationSupport.getUser(request);
-		EtlDestination result 
+		Destination result 
 				= new Destinations(this.etlProperties, user, this.destinationDao, this.groupDao).getOne(destId);
 		if (result != null) {
 			return result;
@@ -121,7 +121,7 @@ public class DestinationResource {
 	}
 
 	@GET
-	public List<EtlDestination> getAll(
+	public List<Destination> getAll(
 			@Context HttpServletRequest request,
 			@QueryParam("type") DestinationType type) {
 		AuthorizedUserEntity user = this.authenticationSupport.getUser(request);

@@ -40,7 +40,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.DestinationEntityVisitor;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
@@ -51,6 +50,7 @@ import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetSenderDestinationEn
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
+import org.eurekaclinical.eureka.client.comm.Destination;
 
 /**
  *
@@ -63,7 +63,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 	private final PatientSetExtractorDestinationsDTOExtractor patientSetExtractorExtractor;
 	private final PatientSetSenderDestinationsDTOExtractor patientSetSenderExtractor;
 	private final TabularFileDestinationsDTOExtractor tabularFileExtractor;
-	private EtlDestination destDTO;
+	private Destination destDTO;
 
 	public DestinationDTOExtractorVisitor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
 		this.cohortExtractor = new CohortDestinationsDTOExtractor(user, inGroupDao);
@@ -104,7 +104,7 @@ public class DestinationDTOExtractorVisitor implements ConfigDTOExtractorVisitor
 		this.destDTO = this.tabularFileExtractor.extractDTO(tabularFileDestination);
 	}
 	
-	public EtlDestination getEtlDestination() {
+	public Destination getDestination() {
 		return this.destDTO;
 	}
 

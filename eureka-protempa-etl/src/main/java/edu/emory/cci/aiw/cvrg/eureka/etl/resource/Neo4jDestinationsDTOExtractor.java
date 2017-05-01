@@ -40,7 +40,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlNeo4jDestination;
 import org.eurekaclinical.eureka.client.comm.Link;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.LinkEntity;
@@ -49,21 +48,22 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
 import java.util.List;
+import org.eurekaclinical.eureka.client.comm.Neo4jDestination;
 
 /**
  *
  * @author Andrew Post
  */
-class Neo4jDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlNeo4jDestination, Neo4jDestinationEntity> {
+class Neo4jDestinationsDTOExtractor extends DestinationsDTOExtractor<Neo4jDestination, Neo4jDestinationEntity> {
 
 	public Neo4jDestinationsDTOExtractor(EtlProperties etlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
 		super(user, inGroupDao);
 	}
 
 	@Override
-	EtlNeo4jDestination extractDTO(Perm perm,
+	Neo4jDestination extractDTO(Perm perm,
 			Neo4jDestinationEntity destinationEntity) {
-		EtlNeo4jDestination neo4jDestination = new EtlNeo4jDestination();
+		Neo4jDestination neo4jDestination = new Neo4jDestination();
 		neo4jDestination.setName(destinationEntity.getName());
 		neo4jDestination.setDescription(destinationEntity.getDescription());
 		neo4jDestination.setId(destinationEntity.getId());
@@ -75,8 +75,8 @@ class Neo4jDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlNeo4jDes
 		neo4jDestination.setUpdatedAt(destinationEntity.getEffectiveAt());
 		neo4jDestination.setDbPath(destinationEntity.getDbHome());
 		neo4jDestination.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		neo4jDestination.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
-		neo4jDestination.setRequiredPropositionIds(new ArrayList<String>(0));
+		neo4jDestination.setJobConceptListSupported(destinationEntity.isAllowingQueryPropositionIds());
+		neo4jDestination.setRequiredConcepts(new ArrayList<>(0));
 		List<LinkEntity> linkEntities = destinationEntity.getLinks();
 		if (linkEntities != null) {
 			List<Link> links = new ArrayList<>(linkEntities.size());

@@ -40,26 +40,26 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.PatientSetSenderDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
+import org.eurekaclinical.eureka.client.comm.PatientSetSenderDestination;
 
 /**
  *
  * @author Andrew Post
  */
-class PatientSetSenderDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlPatientSetSenderDestination, PatientSetSenderDestinationEntity> {
+class PatientSetSenderDestinationsDTOExtractor extends DestinationsDTOExtractor<PatientSetSenderDestination, PatientSetSenderDestinationEntity> {
 
 	PatientSetSenderDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
 		super(user, inGroupDao);
 	}
 
 	@Override
-	EtlPatientSetSenderDestination extractDTO(Perm perm,
+	PatientSetSenderDestination extractDTO(Perm perm,
 			PatientSetSenderDestinationEntity destinationEntity) {
-		EtlPatientSetSenderDestination dest = new EtlPatientSetSenderDestination();
+		PatientSetSenderDestination dest = new PatientSetSenderDestination();
 		dest.setName(destinationEntity.getName());
 		dest.setDescription(destinationEntity.getDescription());
 		dest.setId(destinationEntity.getId());
@@ -70,8 +70,8 @@ class PatientSetSenderDestinationsDTOExtractor extends DestinationsDTOExtractor<
 		dest.setCreatedAt(destinationEntity.getCreatedAt());
 		dest.setUpdatedAt(destinationEntity.getEffectiveAt());
 		dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
-		dest.setRequiredPropositionIds(new ArrayList<>(0));
+		dest.setJobConceptListSupported(destinationEntity.isAllowingQueryPropositionIds());
+		dest.setRequiredConcepts(new ArrayList<>(0));
 		dest.setAliasPropositionId(destinationEntity.getAliasPropositionId());
 		dest.setAliasFieldName(destinationEntity.getAliasFieldName());
 		dest.setAliasFieldNameProperty(destinationEntity.getAliasFieldNameProperty());
