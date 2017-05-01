@@ -40,12 +40,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 import org.eurekaclinical.eureka.client.comm.Cohort;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlCohortDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetExtractorDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import org.eurekaclinical.eureka.client.comm.Node;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.CohortEntity;
@@ -67,6 +61,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.Response;
+import org.eurekaclinical.eureka.client.comm.CohortDestination;
+import org.eurekaclinical.eureka.client.comm.Destination;
+import org.eurekaclinical.eureka.client.comm.I2B2Destination;
+import org.eurekaclinical.eureka.client.comm.PatientSetExtractorDestination;
+import org.eurekaclinical.eureka.client.comm.PatientSetSenderDestination;
+import org.eurekaclinical.eureka.client.comm.TabularFileDestination;
 import org.eurekaclinical.standardapis.exception.HttpStatusException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,8 +95,8 @@ public final class Destinations {
 		this.etlProperties = inEtlProperties;
 	}
 
- 	public Long create(EtlDestination etlDestination) {
-		if (etlDestination instanceof EtlCohortDestination) {
+ 	public Long create(Destination etlDestination) {
+		if (etlDestination instanceof CohortDestination) {
 			CohortDestinationEntity cde = new CohortDestinationEntity();
 			cde.setName(etlDestination.getName());
 			cde.setDescription(etlDestination.getDescription());
@@ -104,7 +104,7 @@ public final class Destinations {
 			Date now = new Date();
 			cde.setCreatedAt(now);
 			cde.setEffectiveAt(now);
-			Cohort cohort = ((EtlCohortDestination) etlDestination).getCohort();
+			Cohort cohort = ((CohortDestination) etlDestination).getCohort();
 			CohortEntity cohortEntity = new CohortEntity();
 			Node node = cohort.getNode();
 			NodeToNodeEntityVisitor v = new NodeToNodeEntityVisitor();
@@ -118,8 +118,8 @@ public final class Destinations {
 		}
 	}
 
-	public void update(EtlDestination etlDestination) {
-		if (etlDestination instanceof EtlCohortDestination) {
+	public void update(Destination etlDestination) {
+		if (etlDestination instanceof CohortDestination) {
 			DestinationEntity oldEntity = this.destinationDao.retrieve(etlDestination.getId());
 			if (oldEntity == null || !(oldEntity instanceof CohortDestinationEntity)) {
 				throw new HttpStatusException(Response.Status.NOT_FOUND);
@@ -138,7 +138,7 @@ public final class Destinations {
 			cde.setEffectiveAt(now);
 			cde.setCreatedAt(oldEntity.getCreatedAt());
 			
-			Cohort cohort = ((EtlCohortDestination) etlDestination).getCohort();
+			Cohort cohort = ((CohortDestination) etlDestination).getCohort();
 			CohortEntity cohortEntity = new CohortEntity();
 			cde.setCohort(cohortEntity);
 			Node node = cohort.getNode();
@@ -165,13 +165,13 @@ public final class Destinations {
 		return FromConfigFile.toDestId(file);
 	}
 
-	public List<EtlI2B2Destination> getAllI2B2s() {
-		List<EtlI2B2Destination> result = new ArrayList<>();
+	public List<I2B2Destination> getAllI2B2s() {
+		List<I2B2Destination> result = new ArrayList<>();
 		I2B2DestinationsDTOExtractor extractor
 				= new I2B2DestinationsDTOExtractor(this.etlProperties, this.etlUser, this.groupDao);
 		for (I2B2DestinationEntity configEntity
 				: this.destinationDao.getAllI2B2Destinations()) {
-			EtlI2B2Destination dto = extractor.extractDTO(configEntity);
+			I2B2Destination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}
@@ -179,13 +179,13 @@ public final class Destinations {
 		return result;
 	}
 
-	public List<EtlCohortDestination> getAllCohorts() {
-		List<EtlCohortDestination> result = new ArrayList<>();
+	public List<CohortDestination> getAllCohorts() {
+		List<CohortDestination> result = new ArrayList<>();
 		CohortDestinationsDTOExtractor extractor
 				= new CohortDestinationsDTOExtractor(this.etlUser, this.groupDao);
 		for (CohortDestinationEntity configEntity
 				: this.destinationDao.getAllCohortDestinations()) {
-			EtlCohortDestination dto = extractor.extractDTO(configEntity);
+			CohortDestination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}
@@ -193,13 +193,13 @@ public final class Destinations {
 		return result;
 	}
 	
-	public List<EtlPatientSetExtractorDestination> getAllPatientSetExtractors() {
-		List<EtlPatientSetExtractorDestination> result = new ArrayList<>();
+	public List<PatientSetExtractorDestination> getAllPatientSetExtractors() {
+		List<PatientSetExtractorDestination> result = new ArrayList<>();
 		PatientSetExtractorDestinationsDTOExtractor extractor
 				= new PatientSetExtractorDestinationsDTOExtractor(this.etlUser, this.groupDao);
 		for (PatientSetExtractorDestinationEntity configEntity
 				: this.destinationDao.getAllPatientSetExtractorDestinations()) {
-			EtlPatientSetExtractorDestination dto = extractor.extractDTO(configEntity);
+			PatientSetExtractorDestination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}
@@ -207,13 +207,13 @@ public final class Destinations {
 		return result;
 	}
 	
-	public List<EtlPatientSetSenderDestination> getAllPatientSetSenders() {
-		List<EtlPatientSetSenderDestination> result = new ArrayList<>();
+	public List<PatientSetSenderDestination> getAllPatientSetSenders() {
+		List<PatientSetSenderDestination> result = new ArrayList<>();
 		PatientSetSenderDestinationsDTOExtractor extractor
 				= new PatientSetSenderDestinationsDTOExtractor(this.etlUser, this.groupDao);
 		for (PatientSetSenderDestinationEntity configEntity
 				: this.destinationDao.getAllPatientSetSenderDestinations()) {
-			EtlPatientSetSenderDestination dto = extractor.extractDTO(configEntity);
+			PatientSetSenderDestination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}
@@ -221,13 +221,13 @@ public final class Destinations {
 		return result;
 	}
 	
-	public List<EtlTabularFileDestination> getAllTabularFiles() {
-		List<EtlTabularFileDestination> result = new ArrayList<>();
+	public List<TabularFileDestination> getAllTabularFiles() {
+		List<TabularFileDestination> result = new ArrayList<>();
 		TabularFileDestinationsDTOExtractor extractor
 				= new TabularFileDestinationsDTOExtractor(this.etlUser, this.groupDao);
 		for (TabularFileDestinationEntity configEntity
 				: this.destinationDao.getAllTabularFileDestinations()) {
-			EtlTabularFileDestination dto = extractor.extractDTO(configEntity);
+			TabularFileDestination dto = extractor.extractDTO(configEntity);
 			if (dto != null) {
 				result.add(dto);
 			}
@@ -242,7 +242,7 @@ public final class Destinations {
 	 *
 	 * @return a extractDTO.
 	 */
-	public final EtlDestination getOne(String configId) {
+	public final Destination getOne(String configId) {
 		if (configId == null) {
 			throw new IllegalArgumentException("configId cannot be null");
 		}
@@ -254,7 +254,7 @@ public final class Destinations {
 			throw new HttpStatusException(Response.Status.NOT_FOUND);
 		}
 		byName.accept(visitor);
-		return visitor.getEtlDestination();
+		return visitor.getDestination();
 	}
 
 	/**
@@ -262,13 +262,13 @@ public final class Destinations {
 	 *
 	 * @return a {@link List} of configs.
 	 */
-	public final List<EtlDestination> getAll() {
-		List<EtlDestination> result = new ArrayList<>();
+	public final List<Destination> getAll() {
+		List<Destination> result = new ArrayList<>();
 		DestinationDTOExtractorVisitor visitor
 				= new DestinationDTOExtractorVisitor(this.etlProperties, this.etlUser, this.groupDao);
 		for (DestinationEntity configEntity : this.destinationDao.getAll()) {
 			configEntity.accept(visitor);
-			EtlDestination dto = visitor.getEtlDestination();
+			Destination dto = visitor.getDestination();
 			if (dto != null) {
 				result.add(dto);
 			}

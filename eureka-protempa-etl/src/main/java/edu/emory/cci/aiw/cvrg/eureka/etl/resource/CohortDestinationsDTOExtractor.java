@@ -40,27 +40,26 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlCohortDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.CohortDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
-import java.util.Collections;
+import org.eurekaclinical.eureka.client.comm.CohortDestination;
 
 /**
  *
  * @author Andrew Post
  */
-class CohortDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlCohortDestination, CohortDestinationEntity> {
+class CohortDestinationsDTOExtractor extends DestinationsDTOExtractor<CohortDestination, CohortDestinationEntity> {
 
 	public CohortDestinationsDTOExtractor(AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
 		super(user, inGroupDao);
 	}
 
 	@Override
-	EtlCohortDestination extractDTO(Perm perm,
+	CohortDestination extractDTO(Perm perm,
 			CohortDestinationEntity destinationEntity) {
-		EtlCohortDestination cohortDest = new EtlCohortDestination();
+		CohortDestination cohortDest = new CohortDestination();
 		cohortDest.setName(destinationEntity.getName());
 		cohortDest.setDescription(destinationEntity.getDescription());
 		cohortDest.setCohort(destinationEntity.getCohort().toCohort());
@@ -72,8 +71,8 @@ class CohortDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlCohortD
 		cohortDest.setCreatedAt(destinationEntity.getCreatedAt());
 		cohortDest.setUpdatedAt(destinationEntity.getEffectiveAt());
 		cohortDest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		cohortDest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
-		cohortDest.setRequiredPropositionIds(new ArrayList<String>(0));
+		cohortDest.setJobConceptListSupported(destinationEntity.isAllowingQueryPropositionIds());
+		cohortDest.setRequiredConcepts(new ArrayList<>(0));
 
 		return cohortDest;
 	}

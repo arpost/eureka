@@ -44,12 +44,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.GenericType;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import org.eurekaclinical.eureka.client.comm.DestinationType;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlCohortDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetExtractorDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlPatientSetSenderDestination;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import org.eurekaclinical.eureka.client.comm.Job;
 import org.eurekaclinical.eureka.client.comm.JobFilter;
 import edu.emory.cci.aiw.cvrg.eureka.common.comm.JobRequest;
@@ -63,6 +57,12 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 import org.eurekaclinical.common.comm.Role;
 import org.eurekaclinical.common.comm.clients.ClientException;
+import org.eurekaclinical.eureka.client.comm.CohortDestination;
+import org.eurekaclinical.eureka.client.comm.Destination;
+import org.eurekaclinical.eureka.client.comm.I2B2Destination;
+import org.eurekaclinical.eureka.client.comm.PatientSetExtractorDestination;
+import org.eurekaclinical.eureka.client.comm.PatientSetSenderDestination;
+import org.eurekaclinical.eureka.client.comm.TabularFileDestination;
 import org.protempa.PropositionDefinition;
 
 /**
@@ -79,23 +79,23 @@ public class EtlClient extends EurekaClient {
 	private static final GenericType<List<SourceConfig>> SourceConfigListType
 			= new GenericType<List<SourceConfig>>() {
 			};
-	private static final GenericType<List<EtlDestination>> DestinationListType
-			= new GenericType<List<EtlDestination>>() {
+	private static final GenericType<List<Destination>> DestinationListType
+			= new GenericType<List<Destination>>() {
 			};
-	private static final GenericType<List<EtlCohortDestination>> CohortDestinationListType
-			= new GenericType<List<EtlCohortDestination>>() {
+	private static final GenericType<List<CohortDestination>> CohortDestinationListType
+			= new GenericType<List<CohortDestination>>() {
 			};
-	private static final GenericType<List<EtlI2B2Destination>> I2B2DestinationListType
-			= new GenericType<List<EtlI2B2Destination>>() {
+	private static final GenericType<List<I2B2Destination>> I2B2DestinationListType
+			= new GenericType<List<I2B2Destination>>() {
 			};
-	private static final GenericType<List<EtlPatientSetExtractorDestination>> PatientSetExtractorDestinationListType
-			= new GenericType<List<EtlPatientSetExtractorDestination>>() {
+	private static final GenericType<List<PatientSetExtractorDestination>> PatientSetExtractorDestinationListType
+			= new GenericType<List<PatientSetExtractorDestination>>() {
 			};
-	private static final GenericType<List<EtlPatientSetSenderDestination>> PatientSetSenderDestinationListType
-			= new GenericType<List<EtlPatientSetSenderDestination>>() {
+	private static final GenericType<List<PatientSetSenderDestination>> PatientSetSenderDestinationListType
+			= new GenericType<List<PatientSetSenderDestination>>() {
 			};
-	private static final GenericType<List<EtlTabularFileDestination>> TabularFileDestinationListType
-			= new GenericType<List<EtlTabularFileDestination>>() {
+	private static final GenericType<List<TabularFileDestination>> TabularFileDestinationListType
+			= new GenericType<List<TabularFileDestination>>() {
 			};
 	private static final GenericType<List<PropositionDefinition>> PropositionDefinitionList
 			= new GenericType<List<PropositionDefinition>>() {
@@ -131,13 +131,13 @@ public class EtlClient extends EurekaClient {
 		return doGet(path, SourceConfig.class);
 	}
 
-	public List<EtlDestination> getDestinations() throws
+	public List<Destination> getDestinations() throws
 			ClientException {
 		final String path = "/api/protected/destinations";
 		return doGet(path, DestinationListType);
 	}
 
-	public List<EtlCohortDestination> getCohortDestinations() throws
+	public List<CohortDestination> getCohortDestinations() throws
 			ClientException {
 		final String path = "/api/protected/destinations/";
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
@@ -145,7 +145,7 @@ public class EtlClient extends EurekaClient {
 		return doGet(path, CohortDestinationListType, queryParams);
 	}
 
-	public List<EtlI2B2Destination> getI2B2Destinations() throws
+	public List<I2B2Destination> getI2B2Destinations() throws
 			ClientException {
 		final String path = "/api/protected/destinations/";
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
@@ -153,42 +153,42 @@ public class EtlClient extends EurekaClient {
 		return doGet(path, I2B2DestinationListType, queryParams);
 	}
 
-	public List<EtlPatientSetExtractorDestination> getPatientSetExtractorDestinations() throws ClientException {
+	public List<PatientSetExtractorDestination> getPatientSetExtractorDestinations() throws ClientException {
 		final String path = "/api/protected/destinations/";
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("type", DestinationType.PATIENT_SET_EXTRACTOR.name());
 		return doGet(path, PatientSetExtractorDestinationListType, queryParams);
 	}
 	
-	public List<EtlPatientSetSenderDestination> getPatientSetSenderDestinations() throws ClientException {
+	public List<PatientSetSenderDestination> getPatientSetSenderDestinations() throws ClientException {
 		final String path = "/api/protected/destinations/";
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("type", DestinationType.PATIENT_SET_SENDER.name());
 		return doGet(path, PatientSetSenderDestinationListType, queryParams);
 	}
 	
-	public List<EtlTabularFileDestination> getTabularFileDestinations() throws ClientException {
+	public List<TabularFileDestination> getTabularFileDestinations() throws ClientException {
 		final String path = "/api/protected/destinations/";
 		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
 		queryParams.add("type", DestinationType.TABULAR_FILE.name());
 		return doGet(path, TabularFileDestinationListType, queryParams);
 	}
 
-	public EtlDestination getDestination(String destId) throws
+	public Destination getDestination(String destId) throws
 			ClientException {
 		String path = UriBuilder.fromPath("/api/protected/destinations/")
 				.segment(destId)
 				.build().toString();
-		return doGet(path, EtlDestination.class);
+		return doGet(path, Destination.class);
 	}
 
-	public Long createDestination(EtlDestination etlDest) throws ClientException {
+	public Long createDestination(Destination etlDest) throws ClientException {
 		String path = "/api/protected/destinations";
 		URI destURI = doPostCreate(path, etlDest);
                 return extractId(destURI);
 	}
 
-	public void updateDestination(EtlDestination etlDest) throws ClientException {
+	public void updateDestination(Destination etlDest) throws ClientException {
 		String path = "/api/protected/destinations";
 		doPut(path, etlDest);
 	}
