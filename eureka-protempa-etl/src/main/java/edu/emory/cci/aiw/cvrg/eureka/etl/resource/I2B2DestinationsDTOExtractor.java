@@ -39,7 +39,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * <http://www.gnu.org/licenses/gpl-3.0.html>.
  * #L%
  */
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlI2B2Destination;
 import org.eurekaclinical.eureka.client.comm.Link;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.I2B2DestinationEntity;
@@ -49,21 +48,22 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.eurekaclinical.eureka.client.comm.I2B2Destination;
 
 /**
  *
  * @author Andrew Post
  */
-class I2B2DestinationsDTOExtractor extends DestinationsDTOExtractor<EtlI2B2Destination, I2B2DestinationEntity> {
-
+class I2B2DestinationsDTOExtractor extends DestinationsDTOExtractor<I2B2Destination, I2B2DestinationEntity> {
+	
 	public I2B2DestinationsDTOExtractor(EtlProperties inEtlProperties, AuthorizedUserEntity user, EtlGroupDao inGroupDao) {
 		super(user, inGroupDao);
 	}
 
 	@Override
-	EtlI2B2Destination extractDTO(Perm perm,
+	I2B2Destination extractDTO(Perm perm,
 			I2B2DestinationEntity destinationEntity) {
-		EtlI2B2Destination dest = new EtlI2B2Destination();
+		I2B2Destination dest = new I2B2Destination();
 		dest.setName(destinationEntity.getName());
 		dest.setId(destinationEntity.getId());
 		dest.setRead(perm.read);
@@ -73,10 +73,10 @@ class I2B2DestinationsDTOExtractor extends DestinationsDTOExtractor<EtlI2B2Desti
 		dest.setCreatedAt(destinationEntity.getCreatedAt());
 		dest.setUpdatedAt(destinationEntity.getEffectiveAt());
 		dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
+		dest.setJobConceptListSupported(destinationEntity.isAllowingQueryPropositionIds());
 		String visitDimension = destinationEntity.getVisitDimension();
 		if (visitDimension != null) {
-			dest.setRequiredPropositionIds(Collections.singletonList(visitDimension));
+			dest.setRequiredConcepts(Collections.singletonList(visitDimension));
 		}
 		
 		

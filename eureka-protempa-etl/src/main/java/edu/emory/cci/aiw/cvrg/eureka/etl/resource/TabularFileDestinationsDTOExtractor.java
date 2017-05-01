@@ -40,8 +40,6 @@ package edu.emory.cci.aiw.cvrg.eureka.etl.resource;
  * #L%
  */
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTableColumn;
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlTabularFileDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.AuthorizedUserEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.TabularFileDestinationEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.TabularFileDestinationTableColumnEntity;
@@ -50,12 +48,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import org.eurekaclinical.eureka.client.comm.TableColumn;
+import org.eurekaclinical.eureka.client.comm.TabularFileDestination;
 
 /**
  *
  * @author Andrew Post
  */
-class TabularFileDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlTabularFileDestination, TabularFileDestinationEntity> {
+class TabularFileDestinationsDTOExtractor extends DestinationsDTOExtractor<TabularFileDestination, TabularFileDestinationEntity> {
 
 	private static final Comparator<TabularFileDestinationTableColumnEntity> TABLE_COLUMN_COMPARATOR = new Comparator<TabularFileDestinationTableColumnEntity>() {
 		@Override
@@ -70,9 +70,9 @@ class TabularFileDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlTa
 	}
 
 	@Override
-	EtlTabularFileDestination extractDTO(Perm perm,
+	TabularFileDestination extractDTO(Perm perm,
 			TabularFileDestinationEntity destinationEntity) {
-		EtlTabularFileDestination dest = new EtlTabularFileDestination();
+		TabularFileDestination dest = new TabularFileDestination();
 		dest.setName(destinationEntity.getName());
 		dest.setDescription(destinationEntity.getDescription());
 		dest.setId(destinationEntity.getId());
@@ -83,13 +83,13 @@ class TabularFileDestinationsDTOExtractor extends DestinationsDTOExtractor<EtlTa
 		dest.setCreatedAt(destinationEntity.getCreatedAt());
 		dest.setUpdatedAt(destinationEntity.getEffectiveAt());
 		dest.setGetStatisticsSupported(destinationEntity.isGetStatisticsSupported());
-		dest.setAllowingQueryPropositionIds(destinationEntity.isAllowingQueryPropositionIds());
-		dest.setRequiredPropositionIds(new ArrayList<>(0));
-		List<EtlTableColumn> tableColumns = new ArrayList<>();
+		dest.setJobConceptListSupported(destinationEntity.isAllowingQueryPropositionIds());
+		dest.setRequiredConcepts(new ArrayList<>(0));
+		List<TableColumn> tableColumns = new ArrayList<>();
 		List<TabularFileDestinationTableColumnEntity> tableColumnEntities = destinationEntity.getTableColumns();
 		Collections.sort(tableColumnEntities, TABLE_COLUMN_COMPARATOR);
 		for (TabularFileDestinationTableColumnEntity entity : tableColumnEntities) {
-			EtlTableColumn tableColumn = new EtlTableColumn();
+			TableColumn tableColumn = new TableColumn();
 			tableColumn.setTableName(entity.getTableName());
 			tableColumn.setColumnName(entity.getColumnName());
 			tableColumn.setPath(entity.getPath());

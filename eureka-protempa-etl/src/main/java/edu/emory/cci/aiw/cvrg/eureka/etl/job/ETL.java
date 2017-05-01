@@ -55,10 +55,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import edu.emory.cci.aiw.cvrg.eureka.common.comm.EtlDestination;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.JobEntity;
 import edu.emory.cci.aiw.cvrg.eureka.common.entity.JobEventEntity;
 import edu.emory.cci.aiw.cvrg.eureka.etl.config.EtlProperties;
@@ -68,8 +66,7 @@ import edu.emory.cci.aiw.cvrg.eureka.etl.dao.EtlGroupDao;
 import edu.emory.cci.aiw.cvrg.eureka.etl.dest.ProtempaDestinationFactory;
 import edu.emory.cci.aiw.cvrg.eureka.etl.resource.Destinations;
 import java.io.IOException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import org.eurekaclinical.eureka.client.comm.Destination;
 import org.eurekaclinical.eureka.client.comm.JobStatus;
 import org.protempa.ProtempaEvent;
 import org.protempa.ProtempaEventListener;
@@ -117,7 +114,7 @@ public class ETL {
 		try (Protempa protempa = getNewProtempa(job, prompts)) {
 			logValidationEvents(job, protempa.validateDataSourceBackendData(), null);
 
-			EtlDestination eurekaDestination;
+			Destination eurekaDestination;
 			org.protempa.dest.Destination protempaDestination;
 			eurekaDestination
 					= new Destinations(this.etlProperties, job.getUser(),
@@ -128,7 +125,7 @@ public class ETL {
 
 			DefaultQueryBuilder q = new DefaultQueryBuilder();
 			q.setPropositionDefinitions(inPropositionDefinitions);
-			if (!eurekaDestination.isAllowingQueryPropositionIds()) {
+			if (!eurekaDestination.isJobConceptListSupported()) {
 				q.setPropositionIds(protempa.getSupportedPropositionIds(protempaDestination));
 			} else {
 				q.setPropositionIds(inPropIdsToShow);
